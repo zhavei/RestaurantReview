@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -26,6 +27,23 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportActionBar?.hide()
 
+        //region ViewModel
+        val mainViewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory()).get(
+            ActivityMainViewModel::class.java
+        )
+        mainViewModel.restaurant.observe(this) { restaurant ->
+            setRestourantData(restaurant)
+        }
+
+        mainViewModel.listReview.observe(this) { listReview ->
+            setReviewData(listReview)
+        }
+
+        mainViewModel.isLoading.observe(this) {
+            showLoading(it)
+        }
+        //endregion
+
         val layoutManager = LinearLayoutManager(this)
         binding.rvReview.layoutManager = layoutManager
         val itemDecoration = DividerItemDecoration(this, layoutManager.orientation)
@@ -33,12 +51,18 @@ class MainActivity : AppCompatActivity() {
 
         findRestourant()
 
-        binding.btnSend.setOnClickListener { view ->
+        /*binding.btnSend.setOnClickListener { view ->
             postReview(binding.edReview.text.toString())
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(view.windowToken, 0)
-        }
+        }*/
 
+        binding.btnSend.setOnClickListener { view ->
+            mainViewModel.postReview(binding.edReview.text.toString())
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+
+        }
 
     }
 
@@ -97,14 +121,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setReviewData(customerReviews: List<CustomerReviewsItem>) {
-        val listReview = ArrayList<String>()
-        for (review in customerReviews) {
-            listReview.add(
-                """
-                    ${review.review}
-                    - ${review.name}
-                """.trimIndent()
-            )
+        /*  val listReview = ArrayList<String>()
+          for (review in customerReviews) {
+              listReview.add(
+                  """
+                      ${review.review}
+                      - ${review.name}
+                  """.trimIndent()
+              )
+          }*/
+
+        val listReview = customerReviews.map {
+            "${it.review}\n- ${it.name}"
         }
         val adapter = ReviewAdapter(listReview)
         binding.rvReview.adapter = adapter
