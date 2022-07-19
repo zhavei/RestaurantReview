@@ -5,11 +5,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
 import com.syafei.restaurantreview.data.model.*
 import com.syafei.restaurantreview.databinding.ActivityMainBinding
 import com.syafei.restaurantreview.ui.adapter.ReviewAdapter
@@ -21,28 +22,55 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    //declarig viewModel with ktx
+    private val mainViewModel by viewModels<ActivityMainViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
 
-        //region ViewModel
-        val mainViewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory()).get(
-            ActivityMainViewModel::class.java
-        )
+        //region with ktx approaching
         mainViewModel.restaurant.observe(this) { restaurant ->
             setRestourantData(restaurant)
         }
-
-        mainViewModel.listReview.observe(this) { listReview ->
-            setReviewData(listReview)
+        mainViewModel.listReview.observe(this) { listReviews ->
+            setReviewData(listReviews)
         }
-
-        mainViewModel.isLoading.observe(this) {
-            showLoading(it)
+        mainViewModel.isLoading.observe(this) { loading ->
+            showLoading(loading)
+        }
+        mainViewModel.snackBarText.observe(this) { snack ->
+            snack.getContentIfNotHandled()?.let { snackBarText ->
+                Snackbar.make(window.decorView.rootView, snackBarText, Snackbar.LENGTH_SHORT).show()
+            }
         }
         //endregion
+
+
+        /* //region ViewModel no ktx dependencies
+         val mainViewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory()).get(
+             ActivityMainViewModel::class.java
+         )
+         mainViewModel.restaurant.observe(this) { restaurant ->
+             setRestourantData(restaurant)
+         }
+
+         mainViewModel.listReview.observe(this) { listReview ->
+             setReviewData(listReview)
+         }
+
+         mainViewModel.isLoading.observe(this) {
+             showLoading(it)
+         }
+
+         mainViewModel.snackBarText.observe(this) { showSnack ->
+             showSnack.getContentIfNotHandled()?.let { snackBarText ->
+                 Snackbar.make(window.decorView.rootView, snackBarText, Snackbar.LENGTH_SHORT).show()
+             }
+         }
+         //endregion*/
 
         val layoutManager = LinearLayoutManager(this)
         binding.rvReview.layoutManager = layoutManager

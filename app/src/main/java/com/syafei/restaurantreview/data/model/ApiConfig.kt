@@ -1,6 +1,6 @@
 package com.syafei.restaurantreview.data.model
 
-import com.syafei.restaurantreview.BuildConfig
+import com.chuckerteam.chucker.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

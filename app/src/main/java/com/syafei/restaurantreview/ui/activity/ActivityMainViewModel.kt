@@ -20,6 +20,10 @@ class ActivityMainViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
+    // to show snackbar only once with eventWraper
+    private val _snackBarText = MutableLiveData<EventWraper<String>>()
+    val snackBarText: LiveData<EventWraper<String>> = _snackBarText
+
     init {
         findRestaurant()
     }
@@ -60,6 +64,8 @@ class ActivityMainViewModel : ViewModel() {
                 _isLoading.value = false
                 if (response.isSuccessful) {
                     _listReview.value = response.body()?.customerReviews
+                    //to show snackbar once!
+                    _snackBarText.value = EventWraper(response.body()?.message.toString())
                 } else {
                     Log.e(TAG, "onfailure: ${response.message()}")
                 }
